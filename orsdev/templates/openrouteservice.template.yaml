@@ -15,6 +15,7 @@ error_handler:
   # errors can be raised, logged or skipped. Logged errors will also be skipped.
   # ApiError: whenever the API encounters an error (usually status code 400, i.e. invalid request)
   # ValidationError: when request is not correct, i.e. vehicle restrictions for foot-walking
+  # JSONDecodeError: when the response is not JSON at all
   errors:
     ApiError: log
     ValidationError: skip
@@ -257,3 +258,22 @@ endpoints:
       resolve_locations:
       - true
       - false
+  optimization:
+    params:
+      profile:
+      - driving-car
+      - driving-hgv
+      - cycling-regular
+      - foot-walking
+      jobs:
+        min: 3
+        max: 51
+      vehicles:
+        min: 1
+        max: 4
+      capacities:
+      - true
+      #- null
+      time_windows:
+      - true
+      #- null

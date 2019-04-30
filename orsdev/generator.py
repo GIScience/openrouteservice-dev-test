@@ -1,12 +1,15 @@
 from os import path
 import json
-import yaml
 from copy import deepcopy
 import random
+from math import ceil
 import numpy as np
+import yaml
 from shapely.geometry import shape, Point
+import time
 
-from pprint import pprint
+from openrouteservice import optimization
+import openrouteservice as ors
 
 
 class ORSGenerator(object):
@@ -14,8 +17,9 @@ class ORSGenerator(object):
     def __init__(self,
                  endpoint,
                  template_dict,
-                 geojson,
-                 cycles=100):
+                 geojson):
+
+        self._endpoint_dict = template_dict['endpoints'][endpoint]
 
         self._endpoint_params = template_dict['endpoints'][endpoint]['params']
         self.accept_distance = template_dict['distance']
@@ -30,8 +34,7 @@ class ORSGenerator(object):
         self.minx, self.miny, self.maxx, self.maxy = self.polygon.bounds
 
         self._endpoint = endpoint
-        self._multi_params = self._get_multi_params_map()[endpoint]
-        self._cycles = cycles
+        self._multi_params = self._get_multi_params_map().get(endpoint, [])
 
         self.params = dict()
 
@@ -83,6 +86,41 @@ class ORSGenerator(object):
         if self._endpoint == 'matrix':
             self.params['locations'] = self._random_coordinates(n=self.params['locations'])
 
+        if self._endpoint == 'optimization':
+            params = {}
+            jobs, vehicles = list(), list()
+
+            job_amount, vehicle_capacity = None, None
+            if self.params.get('capacities'):
+                job_amount = 10
+                vehicle_capacity = job_amount * ceil(self.params['jobs']/self.params['vehicles'])
+
+            job_time_window, veh_time_window = None, None
+            if self.params.get('time_windows'):
+                job_time_window = [[28800, 64800]]
+                veh_time_window = [28800, 64800]
+            for idx, coord in enumerate(self._random_coordinates(self.params['jobs'])):
+                jobs.append(optimization.Job(
+                    id=idx,
+                    location=coord,
+                    service=120,
+                    amount=[job_amount],
+                    time_windows=job_time_window
+                ))
+            for idx, coord in enumerate(self._random_coordinates(self.params['vehicles'])):
+                vehicles.append(optimization.Vehicle(
+                    id=idx,
+                    profile=self.params['profile'],
+                    start=coord,
+                    end=coord,
+                    capacity=[vehicle_capacity],
+                    time_window=veh_time_window
+                ))
+            params['jobs'] = jobs
+            params['vehicles'] = vehicles
+
+            return params
+
         return self.params
 
     def _reset_params(self):
@@ -133,6 +171,7 @@ class ORSGenerator(object):
             else:
                 raise ValueError
 
+        return d
 
     def _random_coordinates(self, n):
         """
@@ -163,3 +202,20 @@ class ORSGenerator(object):
 
         return coordinates
 
+if __name__ == '__main__':
+    gen = ORSGenerator('optimization',
+                 './templates/openrouteservice_optimization.yaml',
+                 '..//geojson/regbez_karlsruhe.geojson')
+    r = gen.create_requests()
+    print("request successfully prepared:\n{}".format(r))
+    clnt = ors.Client('5b3ce3597851110001cf62484d5d4d0972b540009af270b62e0a5dee',
+                      timeout=1200)
+    start = time.time()
+    try:
+        o = clnt.optimization(**r)
+    except:
+        print("Error from {}".format(clnt.req.body.decode('utf-8')))
+        raise
+    print("request took {} secs.".format(time.time() - start))
+    print("Jobs: {}, Vehicles: {}".format(len(r['jobs']), len(r['vehicles'])))
+    print(o)

@@ -1,0 +1,7 @@
+requests>=2.0
+locustio>=0.11
+openrouteservice>=2.1.0
+shapely>=1.6
+numpy>=1.12
+pyyaml>=0.1.7
+dictdiffer>=0.7.0

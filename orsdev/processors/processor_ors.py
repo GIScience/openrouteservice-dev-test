@@ -1,7 +1,6 @@
-from orsdev.requesters import tester
+from orsdev import generator
 
 import openrouteservice as ors
-import openrouteservicev1 as orsv1
 
 from os import path
 import multiprocessing
@@ -30,7 +29,7 @@ class ORSprocessor(object):
         """
         Initializes a processing client to request dev or load testing.
 
-        :param endpoint: Endpoint to test, one of 'directions', 'isochrones', 'matrix'.
+        :param endpoint: Endpoint to test, one of 'directions', 'isochrones', 'matrix', 'optimization'.
         :type endpoint: str
 
         :param template_dict: Input parameter template YAML. Needs a fully qualified file path. See ../templates/ for options.
@@ -58,7 +57,7 @@ class ORSprocessor(object):
         self._cycles = cycles
         self.cycle = None
 
-        self.requester = tester.ORSGenerator(endpoint, template_dict, geojson)
+        self.requester = generator.ORSGenerator(endpoint, template_dict, geojson)
         self.params = dict()
 
         self.out = list()
@@ -77,7 +76,7 @@ class ORSprocessor(object):
         :param client_dev: ors-py client with base_url pointing to server to test from.
         :type client_dev: openrouteservice.Client()
 
-        :param method: What needs to be done. One of "compare".
+        :param method: What needs to be done. One of ["differ"].
 
         :return:
         """
@@ -205,13 +204,11 @@ class ORSprocessor(object):
 
 
 if __name__ == "__main__":
-    stable_clnt = orsv1.Client(base_url='http://129.206.5.136:8080/ors', timeout=120)
     dev_clnt = ors.Client(base_url='http://129.206.5.136:8080/ors', timeout=120)
     test = ORSprocessor('matrix',
                      '../templates/openrouteservice_isochrones_matrix.yaml',
                      '../../geojson/regbez_karlsruhe.geojson',
                      300)
     test.dev_test(
-                 stable_clnt,
                  dev_clnt)
     # test.create_parameters()

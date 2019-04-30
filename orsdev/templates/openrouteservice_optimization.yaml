@@ -1,0 +1,33 @@
+---
+#### CONFIGURATION ####
+# - numeric parameter: as mapping with "min", "max"(, "step") --> will be picked for each request from this range
+# - textual parameter: as list with unique options --> will be randomly picked for each from this list
+# - coordinate parameter: like numeric, only that it specifies the amount of coordinates to produce
+# - custom parameters: have to be registered in code, e.g. isochrone range, directions options.avoid_countries etc
+
+# :param distance (optional): is the min/max (crow-flight) distance for a waypoint from the previous waypoint in degrees
+# Be careful here. If it's too restrictive, it won't find suitable coordinates
+distance:
+  min: 0.5 # 1 degree ~= 60-110 km up to 50° N/S
+  max: 1 # 1 degree ~= 60-110 km up to 50° N/S
+
+endpoints:
+  optimization:
+    params:
+      profile:
+        - driving-car
+        - driving-hgv
+        - cycling-regular
+        - foot-walking
+      jobs:
+        min: 3
+        max: 51
+      vehicles:
+        min: 1
+        max: 4
+      capacities:
+        - true
+        #- false
+      time_windows:
+        - true
+        #- false
