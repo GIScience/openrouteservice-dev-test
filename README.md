@@ -2,6 +2,18 @@
 
 This whole module is under construction and the only functionality valid for usage: **load testing**.
 
+## Installation
+
+```bash
+git clone https://github.com/GIScience/openrouteservice-dev-test.git
+cd openrouteservice-dev-test
+
+# virtual env
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## Purpose
 
 This repository is targeting 
