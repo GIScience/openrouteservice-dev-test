@@ -1,0 +1,279 @@
+---
+#### CONFIGURATION ####
+# - numeric parameter: as mapping with "min", "max", "step"
+# - textual parameter: as list with unique options
+# - coordinate parameter: like numeric, only that it specifies the amount of coordinates to produce
+# - custom parameters: have to be registered in code, e.g. isochrone range, directions options.avoid_countries etc
+
+# :param distance (optional): is the min/max (crow-flight) distance for a waypoint from the previous waypoint in degrees
+# Be careful here. If it's too restrictive, it won't find suitable coordinates
+distance:
+  min: 0.01 # 1 degree ~= 60-110 km up to 50° N/S
+  max: 0.8 # 1 degree ~= 60-110 km up to 50° N/S
+
+error_handler:
+  # errors can be raised, logged or skipped. Logged errors will also be skipped.
+  # ApiError: whenever the API encounters an error (usually status code 400, i.e. invalid request)
+  # ValidationError: when request is not correct, i.e. vehicle restrictions for foot-walking
+  # JSONDecodeError: when the response is not JSON at all
+  errors:
+    ApiError: log
+    ValidationError: skip
+    JSONDecodeError: log
+endpoints:
+  directions:
+    methods:
+      # Compares the whole value of both responses (i.e. resp[0] == resp[1]
+      # Defined as comma-separated keys as found in response
+      # Always define two versions, for json & geojson response, not working with gpx
+      differ:
+        - routes.0.geometry
+        - features.0.geometry
+        - routes.0.summary
+        - feature.0.properties.summary
+        - routes.0.segments
+        - features.0.properties.segments
+        - routes, 0, extras
+        - features, 0, properties, extras
+    params:
+      coordinates:
+        min: 2
+        max: 3
+      profile:
+      - driving-car
+      - driving-hgv
+      - cycling-regular
+      - cycling-road
+      - cycling-mountain
+      - cycling-electric
+      - foot-walking
+      - foot-hiking
+      - wheelchair
+      preference:
+      - fastest
+      - shortest
+      - recommended
+      format:
+      - json
+      - geojson
+      - gpx
+      units:
+      - km
+      - m
+      - mi
+      extra_info:
+      - steepness
+      - suitability
+      - surface
+      - waycategory
+      - waytype
+      - tollways
+      - traildifficulty
+      - roadaccessrestrictions
+      geometry:
+      - true
+      - false
+      geometry_format:
+      - encodedpolyline
+      - geojson
+      - polyline
+      geometry_simplify:
+      - true
+      - false
+      instructions:
+      - true
+      - false
+      instructions_format:
+      - text
+      - html
+      roundabout_exits:
+      - true
+      - false
+      attributes:
+      - avgspeed
+      - detourfactor
+      - percentage
+      maneuvers:
+      - true
+      - false
+#       Optimized can't have true
+      optimized:
+      - null
+      - false
+      radiuses:
+      - true
+      - false
+      elevation:
+      - true
+      - false
+      suppress_warnings:
+        - true
+        - false
+      options:
+        vehicle_type:
+          - hgv
+          - bus
+          - agricultural
+          - forestry
+          - goods
+          - delivery
+        avoid_features:
+          - highways
+          - tollways
+          - ferries
+          - fords
+          - steps
+        avoid_borders:
+          - controlled
+          - all
+        avoid_countries:
+          - true
+          - false
+        profile_params:
+          restrictions:
+            length:
+              min: 1.5
+              max: 20.5
+              step: 0.5
+            width:
+              min: 1
+              max: 4.2
+              step: 0.2
+            height:
+              min: 1
+              max: 6.2
+              step: 0.2
+            axleload:
+              min: 1
+              max: 51
+              step: 1
+            hazmat:
+            - true
+            - false
+            surface_type:
+              - cobblestone:flattened
+              - cobblestone
+              - paving_stones
+              - concrete
+            track_type:
+              - grade1
+              - grade2
+              - grade3
+            smoothness_type:
+              - good
+              - intermediate
+              - bad
+            maximum_sloped_kerb:
+              - 0.03
+              - 0.06
+              - 0.1
+            maximum_incline:
+              - 3
+              - 6
+              - 10
+              - 15
+            minimum_width:
+              min: 2
+              max: 5
+              step: 1
+            gradient:
+              min: 1
+              max: 16
+              step: 1
+          weightings:
+            green:
+              factor:
+                min: 0
+                max: 1.2
+                step: 0.2
+            quiet:
+              factor:
+                min: 0
+                max: 1.2
+                step: 0.2
+  #      avoid_polygons:
+  #      - true
+  #      - false
+  isochrones:
+    methods:
+      differ:
+        - features.0.geometry
+        - features.0.properties
+        - features.1.geometry
+        - features.1.properties
+    params:
+      locations:
+        min: 2
+        max: 3
+      location_type:
+      - start
+      - destination
+      profile:
+      - driving-car
+      - driving-hgv
+      - cycling-regular
+      - cycling-road
+      - cycling-mountain
+      - cycling-electric
+      - foot-walking
+      - foot-hiking
+      range_type:
+      - time
+      - distance
+      range:
+        min: 1
+        max: 2
+      smoothing:
+        min: 0
+        max: 1.2
+        step: 0.2
+      attributes:
+      - area
+      - total_pop
+      - reachfactor
+      intersections:
+      - true
+      - false
+  matrix:
+    methods:
+      differ:
+        - durations
+        - distances
+    params:
+      locations:
+        min: 14
+        max: 15
+      profile:
+      - driving-car
+      - driving-hgv
+      - cycling-regular
+      - cycling-road
+      - cycling-mountain
+      - cycling-electric
+      - foot-walking
+      - foot-hiking
+      metrics:
+      - duration
+      - distance
+      resolve_locations:
+      - true
+      - false
+  optimization:
+    params:
+      profile:
+      - driving-car
+      - driving-hgv
+      - cycling-regular
+      - foot-walking
+      jobs:
+        min: 3
+        max: 51
+      vehicles:
+        min: 1
+        max: 4
+      capacities:
+      - true
+      #- null
+      time_windows:
+      - true
+      #- null
